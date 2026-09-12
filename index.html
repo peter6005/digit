@@ -75,15 +75,27 @@
         <div class="demo-carousel-wrap">
           <button type="button" class="demo-nav demo-nav-prev" id="demo-prev" aria-label="Előző kép">‹</button>
           <div class="demo-carousel" id="demo-carousel">
-            <img class="demo-slide is-active" src="demo-vktabla.png"
-                 alt="A Franckarika diszjunktív és konjunktív V-K tábláját mutató részlete, színes csoportosítással"
-                 data-caption="V-K táblák — diszjunktív és konjunktív csoportosítás egymás mellett, színes jelöléssel">
+            <img class="demo-slide is-active" src="demo-hazard.png"
+                 alt="V-K tábla szaggatott körrel jelölt statikus hazard javító csoporttal"
+                 data-caption="Hazárd-elemzés — a javító csoportok szaggatott körrel és külön jelöléssel emelve ki">
             <img class="demo-slide" src="demo-tablazat.png"
                  alt="Beállítások, igazságtáblázat és sorszámos alak egymás mellett"
                  data-caption="Igazságtáblázat és sorszámos alak — bármelyiket szerkeszted, a többi azonnal frissül">
+            <img class="demo-slide" src="demo-vktabla.png"
+                 alt="A Franckarika diszjunktív V-K tábláját mutató részlete, színes csoportosítással"
+                 data-caption="V-K tábla — automatikus, színes csoportosítás, kattintható mezőkkel">
+            <img class="demo-slide" src="demo-nev.png"
+                 alt="NÉV kapukkal — NEM, ÉS és VAGY kapukkal felépített közvetlen hálózat"
+                 data-caption="Realizálás NÉV kapukkal — a minimál alak közvetlen, tankönyvi megvalósítása">
             <img class="demo-slide" src="demo-kapuk.png"
-                 alt="NAND és NOR kapu-realizáció automatikusan rajzolt hálózata"
-                 data-caption="NAND és NOR kapu-realizáció — automatikusan rajzolt, De Morgan-azonosság szerinti hálózat">
+                 alt="NAND kapu-realizáció automatikusan rajzolt hálózata"
+                 data-caption="NAND kapu-realizáció — automatikusan rajzolt, De Morgan-azonosság szerinti hálózat">
+            <img class="demo-slide" src="demo-vktabla-konj.png"
+                 alt="A Franckarika konjunktív V-K tábláját mutató részlete, 3-változós példával"
+                 data-caption="Konjunktív V-K tábla — most 3 változóval, a 0-mezőket csoportosítva">
+            <img class="demo-slide" src="demo-ketbemenetu.png"
+                 alt="NAND hálózat kizárólag kétbemenetű kapukra bontva"
+                 data-caption="Kétbemenetű kapuláncok — egy kapcsolóval a klasszikus univerzális kapu technikával épül fel">
             <img class="demo-slide" src="demo-pdf.png"
                  alt="Letisztult, színes, automatikusan generált PDF összefoglaló"
                  data-caption="Egy kattintással letölthető, nyomtatható PDF-összefoglaló">
@@ -95,9 +107,13 @@
           <button type="button" class="demo-dot" aria-label="2. kép megjelenítése" aria-selected="false"></button>
           <button type="button" class="demo-dot" aria-label="3. kép megjelenítése" aria-selected="false"></button>
           <button type="button" class="demo-dot" aria-label="4. kép megjelenítése" aria-selected="false"></button>
+          <button type="button" class="demo-dot" aria-label="5. kép megjelenítése" aria-selected="false"></button>
+          <button type="button" class="demo-dot" aria-label="6. kép megjelenítése" aria-selected="false"></button>
+          <button type="button" class="demo-dot" aria-label="7. kép megjelenítése" aria-selected="false"></button>
+          <button type="button" class="demo-dot" aria-label="8. kép megjelenítése" aria-selected="false"></button>
         </div>
       </div>
-      <p class="demo-caption" id="demo-caption">V-K táblák — diszjunktív és konjunktív csoportosítás egymás mellett, színes jelöléssel</p>
+      <p class="demo-caption" id="demo-caption">Hazárd-elemzés — a javító csoportok szaggatott körrel és külön jelöléssel emelve ki</p>
     </section>
 
     <section class="features-section">
@@ -148,6 +164,16 @@
 
     <p class="footer-note">Készült digitális technika tanuláshoz.</p>
   </main>
+
+  <div class="demo-lightbox" id="demo-lightbox">
+    <button type="button" class="demo-lightbox-close" id="demo-lightbox-close" aria-label="Bezárás">×</button>
+    <button type="button" class="demo-lightbox-nav demo-lightbox-prev" id="demo-lightbox-prev" aria-label="Előző kép">‹</button>
+    <div class="demo-lightbox-content">
+      <img id="demo-lightbox-img" src="" alt="">
+      <p class="demo-lightbox-caption" id="demo-lightbox-caption"></p>
+    </div>
+    <button type="button" class="demo-lightbox-nav demo-lightbox-next" id="demo-lightbox-next" aria-label="Következő kép">›</button>
+  </div>
 
   <script src="landing.js"></script>
   <script src="transition.js"></script>

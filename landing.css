@@ -240,20 +240,11 @@ h1.hero-title {
   margin-top: 20px;
 }
 
+/* no max-width cap — fills the same width as the hero text/stats above it
+   instead of being artificially boxed in, so the screenshots read bigger
+   by default */
 .demo-frame {
-  max-width: 980px;
-  margin: 0 auto;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 22px;
-  padding: 16px;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(6px);
-  transition: transform 0.25s ease;
-}
-
-.demo-frame:hover {
-  transform: translateY(-4px);
+  width: 100%;
 }
 
 /* the carousel and its two nav buttons as flex siblings — the buttons
@@ -274,7 +265,7 @@ h1.hero-title {
   position: relative;
   flex: 1 1 auto;
   min-width: 0;
-  aspect-ratio: 1.9 / 1;
+  aspect-ratio: 1.5 / 1;
   background: var(--bg-2);
   border-radius: 14px;
   overflow: hidden;
@@ -287,11 +278,18 @@ h1.hero-title {
   height: 100%;
   object-fit: contain;
   opacity: 0;
+  /* an opacity:0 element still hit-tests — without this, whichever slide
+     is LAST in DOM order would always intercept clicks/hover no matter
+     which one is actually visible, since stacking order otherwise just
+     follows source order */
+  pointer-events: none;
   transition: opacity 0.5s ease;
 }
 
 .demo-slide.is-active {
   opacity: 1;
+  pointer-events: auto;
+  cursor: zoom-in;
 }
 
 /* small round "glass" buttons beside the picture — the dots alone don't
@@ -458,5 +456,143 @@ h1.hero-title {
 @media (max-width: 560px) {
   .features {
     grid-template-columns: 1fr;
+  }
+}
+
+/* full-size view of whichever demo slide was tapped — on a phone the
+   carousel frame itself is only ever viewport-width minus gutters and
+   nav-button space, but this overlay drops both, so the same image
+   renders meaningfully bigger without needing a separate mobile-cropped
+   asset. visibility deliberately left out of the transition (only opacity
+   is) — transitioning visibility together with opacity delays the
+   element from actually becoming interactive/focusable until the
+   transition finishes, in at least some browsers */
+.demo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(10, 12, 20, 0.85);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+
+.demo-lightbox.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.demo-lightbox-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.demo-lightbox img {
+  display: block;
+  max-width: 100%;
+  /* leave room below for the caption instead of the image claiming the
+     full available height and pushing the caption out of view */
+  max-height: calc(100vh - 48px - 44px);
+  border-radius: 10px;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
+  cursor: zoom-out;
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.demo-lightbox-caption {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  text-align: center;
+  max-width: 70ch;
+  padding: 0 8px;
+}
+
+/* toggled briefly by landing.js around swapping the <img> src when
+   stepping to the next/previous slide while the lightbox is open, so the
+   switch reads as a deliberate little transition instead of an abrupt cut */
+.demo-lightbox img.is-switching {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+.demo-lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.demo-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.demo-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.demo-lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.demo-lightbox-prev {
+  left: 18px;
+}
+
+.demo-lightbox-next {
+  right: 18px;
+}
+
+@media (max-width: 560px) {
+  .demo-lightbox-nav {
+    width: 38px;
+    height: 38px;
+    font-size: 1.3rem;
+  }
+
+  .demo-lightbox-prev {
+    left: 6px;
+  }
+
+  .demo-lightbox-next {
+    right: 6px;
   }
 }
