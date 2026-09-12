@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Franckarika</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../shared.css">
+<link rel="stylesheet" href="print.css">
+</head>
+<body>
+  <div class="page-loader" id="page-loader">
+    <div class="loader-grid"><span></span><span></span><span></span><span></span></div>
+    <div class="loader-label">Betöltés…</div>
+  </div>
+  <script>
+    (function () {
+      var MIN_MS = 550;
+      var start = performance.now();
+      function reveal() {
+        var el = document.getElementById("page-loader");
+        if (!el) return;
+        var wait = Math.max(0, MIN_MS - (performance.now() - start));
+        setTimeout(function () { el.classList.add("is-hidden"); }, wait);
+      }
+      if (document.readyState === "complete") reveal();
+      else window.addEventListener("load", reveal);
+    })();
+  </script>
+
+  <main class="wrap">
+    <a href="../" class="back-link">← Főoldal</a>
+    <h1>Franckarika</h1>
+    <p class="subtitle">3–5 változós logikai függvények különböző alakjai egy helyen: igazságtáblázat, sorszámos és minimál alakok, diszjunktív és konjunktív V-K táblák, valamint NAND-, NOR- és NÉV kapus megvalósítások, statikus hazárdok felismerése és javítása. A módosítások mindenhol automatikusan frissülnek.</p>
+
+    <div class="pipeline-grid top-grid">
+      <div class="pipeline-col">
+        <section class="card">
+          <h2>Beállítások</h2>
+          <div class="control-row" title="Válaszd ki, hány bemeneti változóval szeretnél dolgozni. A táblázatok és a számítások ennek megfelelően frissülnek.">
+            <span class="control-label">Változók száma</span>
+            <div class="var-count-buttons" id="var-count-buttons">
+              <button type="button" class="var-count-btn" data-n="3" aria-label="3 változó">3</button>
+              <button type="button" class="var-count-btn" data-n="4" aria-label="4 változó">4</button>
+              <button type="button" class="var-count-btn" data-n="5" aria-label="5 változó">5</button>
+            </div>
+          </div>
+
+          <p class="hint">Állítsd be, hogy az egyes betűk melyik helyiértékhez (2ⁿ) tartozzanak.</p>
+          <div id="weight-assign" class="weight-assign"></div>
+          <div class="weight-presets">
+            <button type="button" class="chip-btn" data-preset="default">csökkenő</button>
+            <button type="button" class="chip-btn" data-preset="reverse">növekvő</button>
+          </div>
+          <label class="switch-row switch-row-config">
+            <span class="switch">
+              <input type="checkbox" id="hazard-toggle">
+              <span class="switch-slider"></span>
+            </span>
+            <span>Statikus hazárd keresése és javítása</span>
+          </label>
+          <label class="switch-row switch-row-config">
+            <span class="switch">
+              <input type="checkbox" id="two-input-toggle">
+              <span class="switch-slider"></span>
+            </span>
+            <span>Csak kétbemenetű kapuk</span>
+          </label>
+        </section>
+
+        <section class="card">
+          <h2>Exportálás</h2>
+          <p class="hint">Nyomtatáshoz és PDF-mentéshez készített, különálló összefoglaló. Az exportált változat egyszerű, nyomtatott dokumentumként jelenik meg, nem a weboldal teljes kinézetét másolja.</p>
+          <button type="button" class="export-btn" id="export-pdf-btn">Exportálás / Nyomtatás</button>
+        </section>
+      </div>
+
+      <div class="pipeline-col">
+        <section class="card">
+          <h2>Igazságtáblázat</h2>
+          <p class="hint">Kattints egy sorra, vagy válaszd ki Tab + Enter billentyűkkel. A különböző nézetek adatai automatikusan szinkronban maradnak.</p>
+          <div class="table-scroll">
+            <table id="truth-table">
+              <thead>
+                <tr id="table-head-row"></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <section class="card card-wide" id="sorszam-card">
+      <div class="card-header-row">
+        <h2>Sorszámos alak</h2>
+        <div class="mode-toggle" id="mode-toggle" role="group" aria-label="A lenti számgombok nézete: minterm vagy maxterm">
+          <button type="button" class="mode-toggle-btn" data-mode="sigma">Σ minterm</button>
+          <button type="button" class="mode-toggle-btn" data-mode="pi">Π maxterm</button>
+        </div>
+      </div>
+      <div id="formula-sigma" class="formula formula-line"></div>
+      <div id="formula-pi" class="formula formula-line"></div>
+      <p class="hint" id="sorszam-hint-sigma">A gombok jelenleg a mintermek (Σ) sorszámait mutatják. Egy sorszámra kattintva – akár fent, akár lent, illetve Tab + Enter használatával – módosíthatod az adott mező F értékét.</p>
+      <p class="hint" id="sorszam-hint-pi" hidden>A gombok jelenleg a maxtermek (Π) sorszámait mutatják. Ezek nem egyszerűen a 0 értékű mezők sorszámai: a maxtermek a diszjunktív Σ() alakból a hiányzó sorszámok alapján adódnak. Ez a szokásos sorszámos alakból konjunktív alakba történő átalakítás.</p>
+      <div id="index-grid" class="index-grid" role="group" aria-label="Sorszám váltó"></div>
+    </section>
+
+    <div class="pipeline-stage">
+    <div class="pipeline-grid">
+      <h3 class="pipeline-heading pipeline-heading-left">Diszjunktív</h3>
+      <h3 class="pipeline-heading pipeline-heading-right">Konjunktív</h3>
+
+      <section class="card">
+        <h2>V-K tábla (diszjunktív csoportosítás)</h2>
+        <p class="hint">A tábla Gray-kód szerint van elrendezve. A betűk melletti jelölés mutatja, hogy az adott változó mely mezőkben vesz fel 1 értéket. A program a lehető legnagyobb 1-es csoportokat keresi, és a tábla széleinél is lehet csoportot alkotni. Egy mezőre kattintva itt is módosítható az F értéke.</p>
+        <div class="kmap-planes" id="kmap-planes"></div>
+        <div id="kmap-legend" class="kmap-legend"></div>
+      </section>
+
+      <section class="card">
+        <h2>V-K tábla (konjunktív csoportosítás)</h2>
+        <p class="hint">Ugyanennek a függvénynek a konjunktív (maxterm) változata. A mezők sorszámai a diszjunktív tábla megfelelő mezőinek komplemensei alapján jelennek meg. A program a 0 értékű mezőket csoportosítja, a tábla széleinél itt is létrejöhetnek csoportok. Egy mezőre kattintva az F értéke módosítható.</p>
+        <div class="kmap-planes" id="kmap-planes2"></div>
+        <div id="kmap-legend2" class="kmap-legend"></div>
+      </section>
+
+      <section class="card">
+        <h2>Diszjunktív minimál alak</h2>
+        <p class="hint">A fenti csoportok közül a program kiválasztja a szükséges minimumot. Minden esszenciális csoport bekerül, majd a még le nem fedett mezőkhöz hozzáadja a lehető legkevesebb további csoportot.</p>
+        <div id="minimal-formula" class="formula"></div>
+      </section>
+
+      <section class="card">
+        <h2>Konjunktív minimál alak</h2>
+        <p class="hint">A fenti V-K tábla csoportjai közül a program itt is kiválasztja a szükséges minimumot. Ez a diszjunktív minimál alak duálisa: szorzatösszeg helyett összegszorzat.</p>
+        <div id="conjunctive-minimal-formula" class="formula"></div>
+      </section>
+
+      <section class="card">
+        <h2>Realizálás NÉV kapukkal</h2>
+        <p class="hint">A diszjunktív minimál alak közvetlen megvalósítása NEM, ÉS és VAGY kapukkal. Minden szorzati tag egy ÉS kapura kerül, majd ezeket egy VAGY kapu kapcsolja össze.</p>
+        <div id="name-gate-diagram" class="gate-diagram"></div>
+      </section>
+
+      <section class="card">
+        <h2>Realizálás NÉV kapukkal</h2>
+        <p class="hint">A konjunktív minimál alak közvetlen megvalósítása NEM, VAGY és ÉS kapukkal. Minden összegzési tag egy VAGY kapura kerül, majd ezeket egy ÉS kapu kapcsolja össze.</p>
+        <div id="name-conj-gate-diagram" class="gate-diagram"></div>
+      </section>
+
+      <section class="card">
+        <h2>Realizálás NAND kapukkal</h2>
+        <p class="hint">A hálózat kizárólag NAND kapuk használatával is megvalósítható. A De Morgan-azonosságok segítségével az ÉS és VAGY műveletek NAND kapukkal helyettesíthetők. A lenti képlet ezt az átalakítást mutatja: az egyes tagokat külön NAND kapuk állítják elő, majd egy további NAND kapu adja a kimenetet.</p>
+        <div id="nand-gate-diagram" class="gate-diagram"></div>
+        <div id="nand-formula" class="formula"></div>
+      </section>
+
+      <section class="card">
+        <h2>Realizálás NOR kapukkal</h2>
+        <p class="hint">A hálózat kizárólag NOR kapukkal is megvalósítható. Ez a NAND-os megvalósítás duális megfelelője, ahol a VAGY és ÉS műveleteket NOR kapuk helyettesítik. A lenti képlet az átalakítást mutatja: az egyes tagokat külön NOR kapuk állítják elő, majd egy további NOR kapu adja a kimenetet.</p>
+        <div id="nor-gate-diagram" class="gate-diagram"></div>
+        <div id="nor-formula" class="formula"></div>
+      </section>
+
+    </div>
+    </div>
+  </main>
+
+  <button type="button" id="clear-fab" class="clear-fab" title="Az összes bemenet törlése">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M3 6h18" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+      <line x1="10" y1="11" x2="10" y2="17" />
+      <line x1="14" y1="11" x2="14" y2="17" />
+    </svg>
+    <span>Összes törlése</span>
+  </button>
+
+  <div id="clear-confirm-overlay" class="modal-overlay">
+    <div class="modal-box" role="alertdialog" aria-modal="true" aria-labelledby="clear-confirm-title" aria-describedby="clear-confirm-desc">
+      <h2 id="clear-confirm-title">Törlöd az összes bemenetet?</h2>
+      <p id="clear-confirm-desc">Minden kiválasztott sorszám törlődik. A művelet nem vonható vissza!</p>
+      <div class="modal-actions">
+        <button type="button" id="clear-confirm-cancel" class="modal-btn modal-btn-secondary">Mégse</button>
+        <button type="button" id="clear-confirm-ok" class="modal-btn modal-btn-danger">Igen, törlöm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="print-doc" aria-hidden="true"></div>
+
+  <script src="app.js"></script>
+  <script src="export.js"></script>
+  <script src="../transition.js"></script>
+</body>
+</html>

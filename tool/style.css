@@ -1,0 +1,1058 @@
+:root {
+  --bg: #f5f6f8;
+  --card-bg: #ffffff;
+  --text: #1c1f26;
+  --muted: #667085;
+  --border: #e2e5ea;
+  --accent: #3b5bfd;
+  --accent-fg: #ffffff;
+  --one-bg: #e6f7ec;
+  --one-text: #12703f;
+  --off-hover-bg: #fdecea;
+  --error: #d1293d;
+  /* brand colors — shared.css's loader dots use these on both pages */
+  --accent-a: #6a5bff;
+  --accent-b: #ff6b9d;
+  --accent-c: #35d0ba;
+  --accent-d: #ffb648;
+  /* shared font stacks and focus style — defined once here so print.css
+     (which needs the same sans/mono stacks outside its serif-forced body
+     copy) can just reference them too, instead of repeating the literal
+     font list in another file */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", Consolas, Menlo, monospace;
+  --focus-ring: 2px solid var(--accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161b;
+    --card-bg: #1d2027;
+    --text: #e8eaed;
+    --muted: #9aa1ac;
+    --border: #2c303a;
+    --accent: #6a86ff;
+    --accent-fg: #0c0e12;
+    --one-bg: #143c28;
+    --one-text: #6fdc9a;
+    --off-hover-bg: #3a1e20;
+    --error: #ff6b7a;
+  }
+}
+
+* { box-sizing: border-box; }
+
+/* page-loader/page-transition rules themselves live in shared.css; this page
+   only needs to say what background the loader should match */
+.page-loader {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+/* cards outside the two-column pipeline stay at a comfortable reading width */
+.wrap > .card {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* the Sorszámos alak card holds a keypad grid that benefits from the full
+   content width, so it opts out of the narrower single-card measure above */
+.wrap > .card.card-wide {
+  max-width: none;
+}
+
+.pipeline-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+/* the settings card is short and doesn't need half the width — giving it a
+   narrower, content-sized column (instead of an equal 1fr split against the
+   much taller truth table) avoids a big empty box under it and reads as an
+   intentional sidebar instead of a mismatched pair */
+.pipeline-grid.top-grid {
+  grid-template-columns: minmax(300px, 400px) 1fr;
+}
+
+/* the diszjunktív/konjunktív pairs below (K-maps, minimal forms, gate
+   diagrams) may grow past .wrap's normal 1180px measure on wide screens —
+   a complex two-input-only NAND/NOR chain wants real room before it has to
+   fall back to scrolling. min-width:0 on .card (below) stops it from
+   forcing this in the other direction.
+   .pipeline-grid on its own can't just take width:auto here — a plain
+   margin:auto does NOT center a box that's explicitly wider than its
+   container (over-constrained auto margins resolve to 0, not negative, so
+   the box would hug the left edge and overflow only to the right — exactly
+   the lopsided look this is fixing). .pipeline-stage exists to sidestep
+   that: it's the classic "full-bleed" wrapper — width:100vw plus a
+   calc(50% - 50vw) margin reliably spans edge-to-edge regardless of how
+   its own ancestors (.wrap, centered at max 1180px) are positioned. Once
+   .pipeline-grid's parent genuinely IS the viewport width, a completely
+   ordinary max-width + margin:auto on the grid itself centers correctly,
+   no over-constraint involved */
+@media (min-width: 861px) {
+  .pipeline-stage {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+  }
+
+  .pipeline-stage .pipeline-grid {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.pipeline-heading {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+@media (max-width: 860px) {
+  .pipeline-grid,
+  .pipeline-grid.top-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.back-link {
+  display: inline-block;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+}
+
+.card {
+  /* without this, a grid item's automatic min-width defaults to its
+     content's full intrinsic size — so a very wide gate diagram (a long
+     two-input-only NAND/NOR chain) would force this whole card, its grid
+     track, and the page itself wider instead of letting .gate-diagram's own
+     overflow-x:auto scroll internally, which is what actually produced the
+     lopsided/overflowing-only-on-the-right look */
+  min-width: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card h2 {
+  font-size: 1.05rem;
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 6px 0 0;
+}
+
+/* a rarely-touched control (most sessions never leave the default A-D
+   order) doesn't need the same visual weight as the stuff people adjust
+   every time — kept small and tight rather than matching the truth
+   table's scale */
+.weight-assign {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.weight-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.weight-slot .weight-label {
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.weight-slot select {
+  width: 100%;
+  padding: 4px 4px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-align: center;
+  text-align-last: center;
+}
+
+.weight-slot select:focus {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.weight-presets {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+/* shared pill-button look for every rounded, bordered toggle chip in the
+   settings card (weight presets, var-count picker, index keypad) — same
+   base look and hover, each keeping only its own size/shape on top */
+.chip-btn,
+.var-count-btn,
+.index-grid button,
+.weight-slot select {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.chip-btn,
+.var-count-btn,
+.index-grid button {
+  cursor: pointer;
+}
+
+.chip-btn:hover,
+.var-count-btn:hover,
+.index-grid button:hover {
+  border-color: var(--accent);
+}
+
+.chip-btn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+}
+
+/* no border here — the weight-assign grid right below is just choosing
+   which letter sits at which bit of this same variable count, not a
+   separate section, so a dividing line between them was misleading */
+.control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.control-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.var-count-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.var-count-btn {
+  min-width: 30px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+}
+
+.var-count-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+  font-weight: 600;
+}
+
+th.var-col {
+  cursor: default;
+}
+
+tr.row-clickable {
+  cursor: pointer;
+}
+
+tr.row-clickable:hover td {
+  background: var(--one-bg);
+}
+
+tr.row-clickable.f-one:hover td {
+  background: var(--off-hover-bg);
+}
+
+tr.row-clickable:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: -2px;
+}
+
+td.f-cell {
+  font-weight: 700;
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.card-header-row h2 {
+  margin-bottom: 0;
+}
+
+/* a floating action button instead of a small text link buried at the top
+   of the page — always reachable no matter how far down the pipeline
+   you've scrolled, and only shown once there's actually something to
+   clear, so it doesn't sit there as dead chrome on a fresh page load */
+.clear-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 999px;
+  padding: 13px 20px;
+  background: var(--error);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translateY(14px) scale(0.94);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.15s ease;
+}
+
+.clear-fab.clear-fab-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.clear-fab:hover {
+  box-shadow: 0 16px 34px -10px rgba(0, 0, 0, 0.5);
+}
+
+.clear-fab svg {
+  flex: none;
+}
+
+@media (max-width: 480px) {
+  .clear-fab span {
+    display: none;
+  }
+
+  .clear-fab {
+    padding: 14px;
+  }
+}
+
+/* clicking the clear fab opens this instead of acting immediately — a
+   real confirm/cancel choice reads far more clearly than a "click again"
+   button state, and a background click or Escape both cancel it, same as
+   any standard dialog */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(10, 12, 20, 0.55);
+  opacity: 0;
+  /* visibility is deliberately NOT in the transition list — it needs to
+     flip the instant the class toggles (both ways), or focus() on a
+     descendant right after opening silently no-ops until the opacity
+     transition finishes, since the element still reads as hidden until then */
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+
+.modal-overlay.modal-overlay-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-box {
+  width: 100%;
+  max-width: 360px;
+  background: var(--card-bg);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.5);
+  transform: translateY(10px) scale(0.97);
+  transition: transform 0.2s ease;
+}
+
+.modal-overlay.modal-overlay-visible .modal-box {
+  transform: translateY(0) scale(1);
+}
+
+.modal-box h2 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+}
+
+.modal-box p {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modal-btn {
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-btn-secondary {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.modal-btn-secondary:hover {
+  border-color: var(--accent);
+}
+
+.modal-btn-danger {
+  background: var(--error);
+  color: #fff;
+}
+
+.modal-btn-danger:hover {
+  opacity: 0.9;
+}
+
+.export-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.export-btn:hover {
+  opacity: 0.9;
+}
+
+.formula {
+  font-size: 1.1rem;
+  font-family: var(--font-mono);
+  line-height: 1.6;
+}
+
+.formula + .formula {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.index-chip {
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0 3px;
+  margin: 0 -1px;
+  transition: background 0.1s, color 0.1s;
+}
+
+.index-chip:hover {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+
+.index-chip:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}
+
+/* the stable full-range toggle grid inside each Sorszámos alak card — a
+   fixed-position complement to the inline chips above, which reflow every
+   time the selection changes. Highlighted the same way as the K-map cells
+   (green = this side's target value: 1 for diszjunktív, 0 for konjunktív) */
+.index-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.index-grid button {
+  padding: 8px 0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.index-grid button.active {
+  background: var(--one-bg);
+  border-color: var(--one-bg);
+  color: var(--one-text);
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .index-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* drawn with a real border-top (not text-decoration: overline), because
+   nested .overline spans (De Morgan NAND/NOR formulas wrap an already-
+   negated literal in a term-bar, then wrap that in an outer final-gate
+   bar) need their lines to sit at visibly different heights — nested
+   text-decoration lines all coincide on the same pixel row and are
+   indistinguishable, and so (surprisingly) does padding-top+border-top on
+   a plain `inline` element, since inline padding doesn't grow the line
+   box. inline-block does grow it, so each wrapper's own padding-top
+   pushes its border further up than the one it contains, stacking
+   automatically with no manual depth/offset bookkeeping needed */
+.overline {
+  display: inline-block;
+  border-top: 1.3px solid currentColor;
+  padding-top: 2px;
+}
+
+.empty-msg {
+  color: var(--muted);
+  font-style: italic;
+  padding: 10px 0;
+}
+
+.kmap-planes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+}
+
+.kmap-plane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.kmap-plane-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+}
+
+.kmap-wrap {
+  position: relative;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow-x: auto;
+  /* both axes' letters stack above/left of the grid (see renderPlaneAxis and
+     AXIS_OFFSETS), so only those two sides need room for the brackets —
+     right/bottom just need enough space for each cell's small index number */
+  padding-top: 70px;
+  padding-left: 70px;
+  padding-right: 16px;
+  padding-bottom: 16px;
+}
+
+.kmap-table {
+  width: auto;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.kmap-table td {
+  width: 64px;
+  height: 56px;
+  min-width: 64px;
+  border: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.85rem;
+  padding: 0;
+}
+
+.kmap-table td.kmap-cell {
+  cursor: pointer;
+  color: var(--text);
+  position: relative;
+  vertical-align: middle;
+}
+
+.kmap-table td.kmap-cell:hover {
+  background: var(--one-bg);
+}
+
+.kmap-table td.kmap-cell.kmap-cell-highlight {
+  background: var(--one-bg);
+  color: var(--one-text);
+}
+
+.kmap-table td.kmap-cell.kmap-cell-highlight:hover {
+  background: var(--off-hover-bg);
+}
+
+.kmap-table td.kmap-cell:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: -2px;
+}
+
+@media (max-width: 480px) {
+  .kmap-table td {
+    width: 46px;
+    height: 42px;
+    min-width: 46px;
+  }
+
+  .kmap-value {
+    font-size: 0.95rem;
+  }
+
+  .kmap-index {
+    font-size: 0.58rem;
+  }
+}
+
+.kmap-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.kmap-index {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.kmap-cell.kmap-cell-highlight .kmap-index {
+  color: var(--one-text);
+  opacity: 0.75;
+}
+
+.kmap-axis {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.kmap-axis-line-h {
+  position: absolute;
+  height: 0;
+  border-top: 2px solid var(--text);
+}
+
+.kmap-axis-line-v {
+  position: absolute;
+  width: 0;
+  border-left: 2px solid var(--text);
+}
+
+.kmap-axis-tick-h {
+  position: absolute;
+  width: 0;
+  height: 7px;
+  border-left: 2px solid var(--text);
+}
+
+.kmap-axis-tick-v {
+  position: absolute;
+  width: 7px;
+  height: 0;
+  border-top: 2px solid var(--text);
+}
+
+.kmap-axis-label {
+  position: absolute;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.kmap-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.kmap-group-piece {
+  position: absolute;
+  border-width: 3px;
+  border-style: solid;
+  border-radius: 10px;
+  box-sizing: border-box;
+  transition: opacity 0.15s;
+}
+
+.kmap-group-badge {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 3px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: opacity 0.15s;
+}
+
+/* hovering a legend row (see wireLegendHover) fades every other group's
+   circle(s) on the K-map so the hovered one stands out */
+.kmap-group-piece.kmap-group-dim,
+.kmap-group-badge.kmap-group-dim {
+  opacity: 0.15;
+}
+
+.kmap-legend {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kmap-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  flex-wrap: wrap;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.kmap-legend-row:hover {
+  background: var(--bg);
+}
+
+.kmap-legend-badge {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kmap-legend-term {
+  font-family: var(--font-mono);
+}
+
+.kmap-legend-meta {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.kmap-legend-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.kmap-legend-tag-hazard {
+  background: var(--off-hover-bg);
+  color: var(--error);
+}
+
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  user-select: none;
+}
+
+.switch-row-config {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* a bold, unmistakable segmented control — much more noticeable than a
+   plain checkbox-style switch for something that changes what the keypad
+   below means */
+.mode-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  flex: none;
+}
+
+.mode-toggle-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.mode-toggle-btn:hover {
+  color: var(--text);
+}
+
+.mode-toggle-btn.active {
+  background: var(--accent);
+  color: var(--accent-fg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 480px) {
+  .mode-toggle-btn {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+/* both Σ() and Π() index formulas stay visible together (so the conversion
+   between them is always on screen) — the one matching the keypad's
+   current mode is emphasized, the other stays legible but secondary */
+.formula-line {
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+.formula-line.formula-active {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex: none;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 999px;
+  transition: background 0.15s;
+}
+
+.switch-slider::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  background: var(--card-bg);
+  border-radius: 50%;
+  transition: transform 0.15s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.switch input:checked + .switch-slider {
+  background: var(--accent);
+}
+
+.switch input:checked + .switch-slider::before {
+  transform: translateX(18px);
+}
+
+.switch input:focus-visible + .switch-slider {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.gate-diagram {
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+.gate-diagram svg {
+  display: block;
+}
+
+.gate-diagram .gd-wire {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 1.6;
+}
+
+.gate-diagram .gd-gate,
+.gate-diagram .gd-bubble {
+  fill: var(--card-bg);
+  stroke: var(--text);
+  stroke-width: 1.6;
+}
+
+.gate-diagram .gd-label {
+  fill: var(--text);
+  font-size: 13px;
+  font-family: var(--font-mono);
+  dominant-baseline: middle;
+}
+
+.gate-diagram .gd-label-f {
+  fill: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  dominant-baseline: middle;
+}
+
+.gate-diagram .gd-gate-label {
+  fill: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+/* a binary truth table doesn't need to stretch across the whole card —
+   letting it stay compact and centered instead of the generic width:100%
+   every other table gets is most of what makes it feel proportionate
+   instead of like a wide, sparse grid */
+#truth-table {
+  table-layout: fixed;
+  width: auto;
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+#truth-table th:first-child,
+#truth-table td:first-child {
+  border-right: 4px double var(--muted);
+}
+
+#truth-table th:last-child,
+#truth-table td:last-child {
+  border-left: 4px double var(--muted);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+th, td {
+  padding: 8px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  font-size: 1rem;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+tr.f-one td {
+  background: var(--one-bg);
+  color: var(--one-text);
+  font-weight: 600;
+}
