@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Franckarika</title>
+<title>Digit</title>
 <link rel="stylesheet" href="landing.css">
 <link rel="stylesheet" href="shared.css">
+<script src="tools.js"></script>
 </head>
 <body>
   <div class="page-loader" id="page-loader">
@@ -33,147 +34,17 @@
 
   <main class="landing">
     <section class="hero">
-      <h1 class="hero-title">Franckarika</h1>
-      <p class="hero-sub">Adj meg egy 3–5 változós logikai függvényt, és a program automatikusan elkészíti a hozzá tartozó alakokat: igazságtáblázatot, sorszámos és minimál alakokat, diszjunktív és konjunktív V-K táblát, valamint NAND-, NOR- és NÉV kapus megvalósításokat. A statikus hazárdok felismerése és javítása is elérhető. A különböző nézetek egymással szinkronban frissülnek, az elkészült eredmény pedig PDF-ként is kinyomtatható vagy elmenthető.</p>
-
-      <div class="format-chips" aria-hidden="true">
-        <span class="format-chip">Igazságtáblázat</span>
-        <span class="format-chip">Σ / Π sorszámos alak</span>
-        <span class="format-chip">V-K tábla</span>
-        <span class="format-chip">Minimál alakok</span>
-        <span class="format-chip">NAND / NOR</span>
-        <span class="format-chip">NÉV kapuk</span>
-        <span class="format-chip">Hazárd-javítás</span>
-        <span class="format-chip">PDF export</span>
-      </div>
-
-      <div class="cta-row">
-        <a class="cta-btn" href="tool/">
-          Ugrás a táblához <span class="arrow">→</span>
-        </a>
-        <span class="cta-hint">Nincs szükség telepítésre vagy regisztrációra.</span>
-      </div>
-
-      <div class="stats-row">
-        <div class="stat">
-          <div class="stat-num">3–5</div>
-          <div class="stat-label">változó</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">10</div>
-          <div class="stat-label">szinkron nézet</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">1 kattintás</div>
-          <div class="stat-label">a PDF-exporthoz</div>
-        </div>
-      </div>
+      <h1 class="hero-title">Digit</h1>
+      <p class="hero-sub">Interaktív, böngészőben futó eszközök digitális technika tanulásához — nincs szükség telepítésre vagy regisztrációra, minden nézet élőben, egymással szinkronban frissül, az eredmény pedig PDF-ként is exportálható.</p>
     </section>
 
-    <section class="demo-section">
-      <div class="demo-frame">
-        <div class="demo-carousel-wrap">
-          <button type="button" class="demo-nav demo-nav-prev" id="demo-prev" aria-label="Előző kép">‹</button>
-          <div class="demo-carousel" id="demo-carousel">
-            <img class="demo-slide is-active" src="demo-hazard.png"
-                 alt="V-K tábla szaggatott körrel jelölt statikus hazard javító csoporttal"
-                 data-caption="Hazárd-elemzés — a javító csoportok szaggatott körrel és külön jelöléssel emelve ki">
-            <img class="demo-slide" src="demo-tablazat.png"
-                 alt="Beállítások, igazságtáblázat és sorszámos alak egymás mellett"
-                 data-caption="Igazságtáblázat és sorszámos alak — bármelyiket szerkeszted, a többi azonnal frissül">
-            <img class="demo-slide" src="demo-vktabla.png"
-                 alt="A Franckarika diszjunktív V-K tábláját mutató részlete, színes csoportosítással"
-                 data-caption="V-K tábla — automatikus, színes csoportosítás, kattintható mezőkkel">
-            <img class="demo-slide" src="demo-nev.png"
-                 alt="NÉV kapukkal — NEM, ÉS és VAGY kapukkal felépített közvetlen hálózat"
-                 data-caption="Realizálás NÉV kapukkal — a minimál alak közvetlen, tankönyvi megvalósítása">
-            <img class="demo-slide" src="demo-kapuk.png"
-                 alt="NAND kapu-realizáció automatikusan rajzolt hálózata"
-                 data-caption="NAND kapu-realizáció — automatikusan rajzolt, De Morgan-azonosság szerinti hálózat">
-            <img class="demo-slide" src="demo-vktabla-konj.png"
-                 alt="A Franckarika konjunktív V-K tábláját mutató részlete, 3-változós példával"
-                 data-caption="Konjunktív V-K tábla — most 3 változóval, a 0-mezőket csoportosítva">
-            <img class="demo-slide" src="demo-ketbemenetu.png"
-                 alt="NAND hálózat kizárólag kétbemenetű kapukra bontva"
-                 data-caption="Kétbemenetű kapuláncok — egy kapcsolóval a klasszikus univerzális kapu technikával épül fel">
-            <img class="demo-slide" src="demo-pdf.png"
-                 alt="Letisztult, színes, automatikusan generált PDF összefoglaló"
-                 data-caption="Egy kattintással letölthető, nyomtatható PDF-összefoglaló">
-          </div>
-          <button type="button" class="demo-nav demo-nav-next" id="demo-next" aria-label="Következő kép">›</button>
-        </div>
-        <div class="demo-dots" id="demo-dots" role="tablist" aria-label="Demó képek">
-          <button type="button" class="demo-dot is-active" aria-label="1. kép megjelenítése" aria-selected="true"></button>
-          <button type="button" class="demo-dot" aria-label="2. kép megjelenítése" aria-selected="false"></button>
-          <button type="button" class="demo-dot" aria-label="3. kép megjelenítése" aria-selected="false"></button>
-          <button type="button" class="demo-dot" aria-label="4. kép megjelenítése" aria-selected="false"></button>
-          <button type="button" class="demo-dot" aria-label="5. kép megjelenítése" aria-selected="false"></button>
-          <button type="button" class="demo-dot" aria-label="6. kép megjelenítése" aria-selected="false"></button>
-          <button type="button" class="demo-dot" aria-label="7. kép megjelenítése" aria-selected="false"></button>
-          <button type="button" class="demo-dot" aria-label="8. kép megjelenítése" aria-selected="false"></button>
-        </div>
-      </div>
-      <p class="demo-caption" id="demo-caption">Hazárd-elemzés — a javító csoportok szaggatott körrel és külön jelöléssel emelve ki</p>
-    </section>
-
-    <section class="features-section">
-      <h2 class="features-heading">Mit tud?</h2>
-      <div class="features">
-        <div class="feature-card">
-          <span class="icon">🧮</span>
-          <h3>Igazságtáblázat</h3>
-          <p>Az igazságtáblázat soraira vagy a Σ()/Π() sorszámokra kattintva egyszerűen módosítható a függvény. A változások azonnal megjelennek a többi nézetben is.</p>
-        </div>
-        <div class="feature-card">
-          <span class="icon">🗺️</span>
-          <h3>Duális V-K tábla</h3>
-          <p>A diszjunktív és konjunktív V-K tábla egymás mellett jelenik meg. Az egyik oldalon az 1-es, a másikon a 0-s mezők csoportosíthatók. A konjunktív tábla sorszámai a diszjunktív tábla megfelelő mezőinek komplemensei alapján készülnek.</p>
-        </div>
-        <div class="feature-card">
-          <span class="icon">✂️</span>
-          <h3>Minimál alakok</h3>
-          <p>A program automatikusan kiválasztja az esszenciális csoportokat és a még szükséges csoportokat, így előállítja a diszjunktív és konjunktív minimál alakot.</p>
-        </div>
-        <div class="feature-card">
-          <span class="icon">🔌</span>
-          <h3>Kapu-realizációk</h3>
-          <p>A minimál alakokból automatikusan elkészülnek a közvetlen NEM–ÉS–VAGY, NAND-NAND és NOR-NOR kapus hálózatok. Beállítható az is, hogy a rajzokon csak kétbemenetű kapuk szerepeljenek.</p>
-        </div>
-        <div class="feature-card">
-          <span class="icon">⚡</span>
-          <h3>Hazárd-elemzés</h3>
-          <p>A program megkeresi a statikus hazárdokat, és szükség esetén megmutatja a javításhoz szükséges csoportokat is.</p>
-        </div>
-        <div class="feature-card">
-          <span class="icon">🔤</span>
-          <h3>Szabad helyiérték</h3>
-          <p>A változókhoz szabadon hozzárendelhetők a helyiértékek. A hozzárendelések egymással felcserélhetők.</p>
-        </div>
-        <div class="feature-card">
-          <span class="icon">📄</span>
-          <h3>PDF export</h3>
-          <p>Az elkészült függvény és a hozzá tartozó táblázatok, rajzok egy külön, nyomtatásra optimalizált PDF-összefoglalóba exportálhatók.</p>
-        </div>
-        <div class="feature-card">
-          <span class="icon">🔁</span>
-          <h3>Élő szinkron</h3>
-          <p>Ha valamit módosítasz az egyik nézetben, a többi nézet automatikusan követi a változást.</p>
-        </div>
-      </div>
+    <section class="tools-section">
+      <h2 class="section-heading">Eszközök</h2>
+      <div class="tools-grid" id="tools-grid"></div>
     </section>
 
     <p class="footer-note">Készült digitális technika tanuláshoz.</p>
   </main>
-
-  <div class="demo-lightbox" id="demo-lightbox">
-    <button type="button" class="demo-lightbox-close" id="demo-lightbox-close" aria-label="Bezárás">×</button>
-    <button type="button" class="demo-lightbox-nav demo-lightbox-prev" id="demo-lightbox-prev" aria-label="Előző kép">‹</button>
-    <div class="demo-lightbox-content">
-      <img id="demo-lightbox-img" src="" alt="">
-      <p class="demo-lightbox-caption" id="demo-lightbox-caption"></p>
-    </div>
-    <button type="button" class="demo-lightbox-nav demo-lightbox-next" id="demo-lightbox-next" aria-label="Következő kép">›</button>
-  </div>
 
   <script src="landing.js"></script>
   <script src="transition.js"></script>

@@ -1,0 +1,266 @@
+/* print.css — the exported/printed document. Deliberately NOT a copy of the
+   on-screen look: single reading column, serif headings, light paper
+   palette forced regardless of the visitor's dark-mode setting, and every
+   interactive affordance (buttons, switches) stripped from the cloned
+   content that export.js feeds into #print-doc. Mirrors the VK-tábla's
+   print.css so both parts of the site produce the same kind of document. */
+
+#print-doc {
+  display: none;
+}
+
+body.printing .wrap {
+  display: none;
+}
+
+body.printing #print-doc {
+  display: block;
+}
+
+@media print {
+  body.printing .wrap {
+    display: none !important;
+  }
+
+  body.printing #print-doc {
+    display: block !important;
+  }
+
+  @page {
+    margin: 14mm 12mm;
+  }
+}
+
+/* browsers drop background colors when printing by default (to save ink)
+   unless told otherwise — without this, the "1" bit tint in the state/
+   excitation tables and the wire colors in the circuit diagram would
+   silently vanish in the PDF/printout, leaving only borders and text */
+#print-doc,
+#print-doc * {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  color-adjust: exact;
+}
+
+#print-doc {
+  /* force a light, paper-appropriate palette, overriding whatever the
+     visitor's OS dark-mode setting picked for the live page's --root
+     variables (those vars cascade into every cloned element, since the
+     clones keep referencing var(--...)) */
+  --bg: #ffffff;
+  --card-bg: #ffffff;
+  --text: #16181d;
+  --muted: #595f6b;
+  --border: #c7cbd4;
+  --accent: #2a3fb8;
+  --accent-fg: #ffffff;
+  --one-bg: #e3f3e8;
+  --one-text: #145c33;
+  --accent-a: #4d3fcf;
+  --accent-b: #d43e77;
+  --accent-c: #1f9e8b;
+  --accent-d: #c9821f;
+  --accent-e: #2f8f38;
+  --font-serif: Georgia, "Times New Roman", serif;
+
+  font-family: var(--font-serif);
+  color: var(--text);
+  background: #ffffff;
+  max-width: 185mm;
+  margin: 0 auto;
+  padding: 4mm 0 10mm;
+  font-size: 9.5pt;
+}
+
+#print-doc .print-header-bar {
+  height: 3pt;
+  margin: 0 0 12pt;
+  background: linear-gradient(90deg, var(--accent-a), var(--accent-b), var(--accent-d));
+}
+
+#print-doc .print-kicker {
+  font-family: var(--font-sans);
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-b);
+  margin: 0 0 4pt;
+}
+
+#print-doc .print-brand-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10pt;
+}
+
+#print-doc .print-title {
+  font-size: 21pt;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 2pt;
+}
+
+#print-doc .print-brand-dots {
+  display: flex;
+  gap: 3pt;
+  flex: none;
+  transform: translateY(-2pt);
+}
+
+#print-doc .print-brand-dots span {
+  width: 7pt;
+  height: 7pt;
+  border-radius: 999px;
+}
+
+#print-doc .print-brand-dots span:nth-child(1) { background: var(--accent-a); }
+#print-doc .print-brand-dots span:nth-child(2) { background: var(--accent-b); }
+#print-doc .print-brand-dots span:nth-child(3) { background: var(--accent-c); }
+#print-doc .print-brand-dots span:nth-child(4) { background: var(--accent-d); }
+
+#print-doc .print-subtitle {
+  font-family: var(--font-sans);
+  font-size: 9.5pt;
+  color: var(--muted);
+  margin: 0 0 6pt;
+}
+
+#print-doc .print-meta {
+  font-family: var(--font-mono);
+  font-size: 8pt;
+  color: var(--muted);
+  margin: 0 0 11pt;
+  padding-bottom: 7pt;
+  border-bottom: 1.5pt solid var(--text);
+}
+
+#print-doc .print-section {
+  break-inside: avoid;
+  margin: 0 0 11pt;
+}
+
+#print-doc h2 {
+  font-family: var(--font-serif);
+  font-size: 11.5pt;
+  font-weight: 700;
+  margin: 0 0 5pt;
+  padding-bottom: 3pt;
+  border-bottom: 0.75pt solid var(--border);
+  break-after: avoid;
+}
+
+#print-doc p.hint {
+  font-family: var(--font-sans);
+  font-size: 7.5pt;
+  color: var(--muted);
+  margin: 0 0 5pt;
+}
+
+/* strip every interactive control from the cloned live markup — the
+   printed document is read-only */
+#print-doc button,
+#print-doc select,
+#print-doc .switch-row {
+  display: none !important;
+}
+
+#print-doc table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+#print-doc th,
+#print-doc td {
+  padding: 1.5pt 5pt;
+  text-align: center;
+  border-bottom: 0.5pt solid var(--border);
+  font-size: 8pt;
+}
+
+#print-doc th {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 7pt;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+#print-doc tr {
+  break-inside: avoid;
+}
+
+#print-doc #print-state-table td,
+#print-doc #print-excitation-table td {
+  font-family: var(--font-mono);
+}
+
+/* the sequence diagram and circuit diagram are both self-contained SVGs
+   with their own explicit width/height, and both can be wider than a
+   printable page (the circuit diagram especially, at up to ~1600px) — let
+   them scale down to fit instead of getting clipped or forcing the page
+   wide */
+#print-doc .sim-sequence,
+#print-doc .circuit-diagram {
+  overflow: visible;
+}
+
+#print-doc .sim-sequence svg,
+#print-doc .circuit-diagram svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+
+#print-doc .ff-equations {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8pt;
+}
+
+#print-doc .ff-eq-card {
+  border: 0.75pt solid var(--border);
+  border-radius: 4pt;
+  padding: 6pt 8pt;
+  break-inside: avoid;
+}
+
+#print-doc .ff-eq-formula {
+  font-family: var(--font-mono);
+  font-size: 9.5pt;
+  line-height: 1.5;
+}
+
+/* a small branded closing strip — a colored top edge plus the wordmark, in
+   the same gradient treatment as the landing page's hero title, so an
+   exported/printed page still points back to where it came from */
+#print-doc .print-footer {
+  margin-top: 20pt;
+  padding-top: 10pt;
+  border-top: 2pt solid transparent;
+  border-image: linear-gradient(90deg, var(--accent-a), var(--accent-b), var(--accent-d)) 1;
+  text-align: center;
+  break-inside: avoid;
+}
+
+#print-doc .print-footer-brand {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 12pt;
+  margin: 0 0 3pt;
+  color: var(--accent-b);
+}
+
+#print-doc .print-footer-tagline {
+  font-family: var(--font-sans);
+  font-size: 8pt;
+  color: var(--muted);
+  margin: 0;
+  max-width: 120mm;
+  margin-left: auto;
+  margin-right: auto;
+}

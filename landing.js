@@ -1,158 +1,116 @@
-// Auto-advancing demo screenshot carousel in the hero's demo-section.
-// Landing-page-only behavior (unlike transition.js/shared.css), so it
-// lives in its own file rather than bloating the shared one.
-
+// Renders the tool grid from tools.js's TOOLS array — the whole point of
+// pulling that list out into its own file: adding a tool later means
+// adding one object there, and this loop just picks it up, no per-tool
+// HTML to hand-write here.
+//
+// each card is a plain <div>, not a wrapping <a> — a tool's image and its
+// CTA both need to sit inside it, and a future tool could reasonably want
+// more than one clickable thing in its card (e.g. a "docs" link next to
+// the main CTA), which a single enclosing link can't support.
 (function () {
-  var slides = document.querySelectorAll(".demo-slide");
-  var dots = document.querySelectorAll(".demo-dot");
-  var caption = document.getElementById("demo-caption");
-  var carousel = document.getElementById("demo-carousel");
-  var prevBtn = document.getElementById("demo-prev");
-  var nextBtn = document.getElementById("demo-next");
-  var lightbox = document.getElementById("demo-lightbox");
-  var lightboxImg = document.getElementById("demo-lightbox-img");
-  var lightboxCaption = document.getElementById("demo-lightbox-caption");
-  var lightboxClose = document.getElementById("demo-lightbox-close");
-  var lightboxPrev = document.getElementById("demo-lightbox-prev");
-  var lightboxNext = document.getElementById("demo-lightbox-next");
-  if (!slides.length) return;
+  var grid = document.getElementById("tools-grid");
+  if (!grid || typeof TOOLS === "undefined") return;
 
-  var AUTO_MS = 4500;
-  var prefersReducedMotion = window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var slideshows = [];
 
-  var current = 0;
-  var timer = null;
+  TOOLS.forEach(function (tool) {
+    var card = document.createElement("div");
+    card.className = "tool-card";
 
-  function show(i) {
-    current = (i + slides.length) % slides.length;
-    slides.forEach(function (s, idx) {
-      s.classList.toggle("is-active", idx === current);
-    });
-    dots.forEach(function (d, idx) {
-      d.classList.toggle("is-active", idx === current);
-      d.setAttribute("aria-selected", idx === current ? "true" : "false");
-    });
-    if (caption) caption.textContent = slides[current].dataset.caption;
-  }
-
-  function restartAuto() {
-    if (timer) clearInterval(timer);
-    if (prefersReducedMotion) return;
-    // opening the lightbox visually covers #demo-carousel, which fires a
-    // mouseleave on it (the pointer is now "over" the lightbox overlay
-    // instead) — that would otherwise race right past openLightbox()'s
-    // own stopAuto() call and silently resume advancing slides in the
-    // background while the lightbox is still showing an old one
-    if (lightbox && lightbox.classList.contains("is-open")) return;
-    timer = setInterval(function () { show(current + 1); }, AUTO_MS);
-  }
-
-  function stopAuto() {
-    if (timer) clearInterval(timer);
-    timer = null;
-  }
-
-  dots.forEach(function (d, idx) {
-    d.addEventListener("click", function () {
-      show(idx);
-      restartAuto();
-    });
-  });
-
-  if (prevBtn) prevBtn.addEventListener("click", function () {
-    show(current - 1);
-    restartAuto();
-  });
-  if (nextBtn) nextBtn.addEventListener("click", function () {
-    show(current + 1);
-    restartAuto();
-  });
-
-  // pause while hovered or while the tab is in the background, so it
-  // doesn't keep cycling underneath a reader who's paused on one slide
-  if (carousel) {
-    carousel.addEventListener("mouseenter", stopAuto);
-    carousel.addEventListener("mouseleave", restartAuto);
-  }
-  document.addEventListener("visibilitychange", function () {
-    if (document.hidden) stopAuto();
-    else restartAuto();
-  });
-
-  // these screenshots are dense enough that shrunk into the carousel —
-  // especially at phone width — the text in them just isn't readable;
-  // tapping one opens it full-size instead. show() already updates which
-  // slide/dot/caption is "current" — this just also refreshes the
-  // lightbox's own <img> to match, so browsing while it's open reuses the
-  // exact same state instead of tracking its own separate index.
-  // animate=true (stepping to another slide while already open) fades the
-  // old image out, swaps src at the midpoint, then fades the new one in —
-  // matches .demo-lightbox img's own 0.18s opacity/transform transition
-  var LIGHTBOX_SWITCH_MS = 180;
-
-  function updateLightboxImage(animate) {
-    var active = slides[current];
-    if (!animate) {
-      lightboxImg.src = active.src;
-      lightboxImg.alt = active.alt;
-      if (lightboxCaption) lightboxCaption.textContent = active.dataset.caption;
-      return;
+    if (tool.images && tool.images.length) {
+      var slides = document.createElement("a");
+      slides.className = "tool-card-slides";
+      slides.href = tool.slug + "/";
+      slides.tabIndex = -1;
+      slides.setAttribute("aria-hidden", "true");
+      tool.images.forEach(function (image, i) {
+        var img = document.createElement("img");
+        img.className = "tool-card-slide" + (i === 0 ? " is-active" : "");
+        img.src = image.src;
+        img.alt = image.alt || "";
+        img.decoding = "async";
+        slides.appendChild(img);
+      });
+      card.appendChild(slides);
+      slideshows.push(slides);
     }
-    lightboxImg.classList.add("is-switching");
-    setTimeout(function () {
-      lightboxImg.src = active.src;
-      lightboxImg.alt = active.alt;
-      if (lightboxCaption) lightboxCaption.textContent = active.dataset.caption;
-      // force a style flush so the browser registers the faded-out state
-      // before it's removed, or there'd be nothing to transition back from
-      void lightboxImg.offsetWidth;
-      lightboxImg.classList.remove("is-switching");
-    }, LIGHTBOX_SWITCH_MS);
-  }
 
-  function openLightbox() {
-    if (!lightbox) return;
-    updateLightboxImage(false);
-    lightbox.classList.add("is-open");
-    stopAuto();
-    document.addEventListener("keydown", onLightboxKeydown);
-  }
+    var body = document.createElement("div");
+    body.className = "tool-card-body";
+    card.appendChild(body);
 
-  function closeLightbox() {
-    if (!lightbox) return;
-    lightbox.classList.remove("is-open");
-    document.removeEventListener("keydown", onLightboxKeydown);
-    restartAuto();
-  }
+    var icon = document.createElement("span");
+    icon.className = "tool-card-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = tool.icon;
+    body.appendChild(icon);
 
-  function lightboxPrevSlide() {
-    show(current - 1);
-    updateLightboxImage(true);
-  }
+    var name = document.createElement("h3");
+    name.className = "tool-card-name";
+    name.textContent = tool.name;
+    body.appendChild(name);
 
-  function lightboxNextSlide() {
-    show(current + 1);
-    updateLightboxImage(true);
-  }
+    var tagline = document.createElement("p");
+    tagline.className = "tool-card-tagline";
+    tagline.textContent = tool.tagline;
+    body.appendChild(tagline);
 
-  function onLightboxKeydown(e) {
-    if (e.key === "Escape") closeLightbox();
-    if (e.key === "ArrowLeft") lightboxPrevSlide();
-    if (e.key === "ArrowRight") lightboxNextSlide();
-  }
+    var chips = document.createElement("div");
+    chips.className = "tool-card-chips";
+    tool.chips.forEach(function (chipText) {
+      var chip = document.createElement("span");
+      chip.className = "tool-card-chip";
+      chip.textContent = chipText;
+      chips.appendChild(chip);
+    });
+    body.appendChild(chips);
 
-  slides.forEach(function (s) {
-    s.addEventListener("click", openLightbox);
+    var cta = document.createElement("a");
+    cta.className = "tool-card-cta";
+    cta.href = tool.slug + "/";
+    cta.innerHTML = "Megnyitás <span class=\"arrow\">→</span>";
+    body.appendChild(cta);
+
+    grid.appendChild(card);
   });
-  if (lightboxClose) lightboxClose.addEventListener("click", closeLightbox);
-  if (lightbox) lightbox.addEventListener("click", function (e) {
-    if (e.target === lightbox) closeLightbox();
-  });
-  if (lightboxImg) lightboxImg.addEventListener("click", closeLightbox);
-  if (lightboxPrev) lightboxPrev.addEventListener("click", lightboxPrevSlide);
-  if (lightboxNext) lightboxNext.addEventListener("click", lightboxNextSlide);
 
-  show(0);
-  restartAuto();
+  startSlideshows(slideshows);
 })();
+
+// Crossfades each card's screenshots on a timer — deliberately no arrows,
+// dots or captions, just the pictures. Cards are staggered so they never
+// switch at the same moment, a card only advances while it's on screen
+// and the tab is visible, and it waits for the next image to finish
+// loading rather than fading to a blank frame. With reduced motion the
+// first image simply stays put.
+function startSlideshows(slideshows) {
+  var INTERVAL_MS = 2500;
+  if (!slideshows.length) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  var visible = new Map();
+  if ("IntersectionObserver" in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { visible.set(e.target, e.isIntersecting); });
+    });
+    slideshows.forEach(function (s) { observer.observe(s); });
+  }
+
+  function advance(slides) {
+    if (document.hidden || visible.get(slides) === false) return;
+    var imgs = slides.children;
+    if (imgs.length < 2) return;
+    var current = slides.querySelector(".is-active");
+    var next = current.nextElementSibling || imgs[0];
+    if (!next.complete || !next.naturalWidth) return;
+    current.classList.remove("is-active");
+    next.classList.add("is-active");
+  }
+
+  slideshows.forEach(function (slides, i) {
+    var offset = (INTERVAL_MS / slideshows.length) * i;
+    setTimeout(function () {
+      setInterval(function () { advance(slides); }, INTERVAL_MS);
+    }, offset);
+  });
+}

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Átirányítás… – Digit</title>
+<style>
+  /* Self-contained on purpose: GitHub Pages serves this file at whatever
+     (missing) path was requested, at any depth, so relative links to
+     shared.css etc. wouldn't resolve. */
+  :root {
+    --bg: #f5f6f8;
+    --card-bg: #ffffff;
+    --text: #1c1f26;
+    --muted: #667085;
+    --border: #e2e5ea;
+    --accent: #3b5bfd;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --card-bg: #1c1f26;
+      --text: #e8eaed;
+      --muted: #9aa3b2;
+      --border: #2c313b;
+      --accent: #7b93ff;
+    }
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  p { font-size: 0.95rem; }
+  a { color: var(--accent); }
+  #not-found {
+    max-width: 420px;
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  #not-found h1 { margin: 0 0 8px; font-size: 1.25rem; }
+  #not-found p { margin: 0 0 16px; color: var(--muted); }
+  #not-found code { font-size: 0.9em; word-break: break-all; }
+  #not-found ul { margin: 0; padding-left: 20px; line-height: 1.8; }
+</style>
+</head>
+<body>
+  <p id="redirecting">Átirányítás…</p>
+
+  <div id="not-found" hidden>
+    <h1>Az oldal nem található</h1>
+    <p>A(z) <code id="requested"></code> címen nincs semmi. Talán ezek egyikét keresed:</p>
+    <ul id="suggestions"></ul>
+  </div>
+
+  <noscript>
+    <style>#redirecting { display: none; }</style>
+    <p>Az oldal nem található. <a href="/franckarika/">Vissza a főoldalra</a></p>
+  </noscript>
+
+  <script>
+    // Typo-tolerant redirects. GitHub Pages serves this file for any path
+    // that doesn't exist *without changing the URL*, so location.pathname
+    // is still whatever the visitor typed (e.g. /franckarika/vktabla/).
+    // We normalize its first segment and send them to the matching tool,
+    // falling back to a "not found" card with links.
+    (function () {
+      // Hand-picked nicknames and old URLs (tool/ and counter/ were the
+      // tools' real paths before the rename). Keys are normalized — see
+      // norm() — so "k-map", "K_Map" and "kmap" are all the same entry.
+      // The tools' own slugs from tools.js are matched automatically and
+      // don't need to be listed.
+      var ALIASES = {
+        tool: "vk-tabla",
+        vk: "vk-tabla",
+        kmap: "vk-tabla",
+        karnaugh: "vk-tabla",
+        counter: "jk-sorszam",
+        jk: "jk-sorszam",
+        jkszamlalo: "jk-sorszam",
+        szamlalo: "jk-sorszam",
+      };
+
+      // On <user>.github.io/<repo>/ the site lives under /<repo>/; on a
+      // custom domain (or a local test server) it's at the root.
+      var parts = location.pathname.split("/").filter(Boolean);
+      var base = "/";
+      if (/\.github\.io$/.test(location.hostname) && parts.length) {
+        base = "/" + parts.shift() + "/";
+      }
+      var requested = parts[0] || "";
+
+      function norm(s) {
+        try { s = decodeURIComponent(s); } catch (e) {}
+        return s.normalize("NFD").replace(/[̀-ͯ]/g, "")
+          .toLowerCase().replace(/\.html?$/, "").replace(/[^a-z0-9]/g, "");
+      }
+
+      function distance(a, b) {
+        var prev = [], cur, i, j;
+        for (j = 0; j <= b.length; j++) prev[j] = j;
+        for (i = 1; i <= a.length; i++) {
+          cur = [i];
+          for (j = 1; j <= b.length; j++) {
+            cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1,
+              prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+          }
+          prev = cur;
+        }
+        return prev[b.length];
+      }
+
+      function findSlug(tools) {
+        var key = norm(requested);
+        if (!key) return null;
+        var candidates = {};
+        tools.forEach(function (t) { candidates[norm(t.slug)] = t.slug; });
+        Object.keys(ALIASES).forEach(function (k) { candidates[k] = ALIASES[k]; });
+        if (candidates[key]) return candidates[key];
+
+        // Closest candidate within a small, length-scaled edit distance —
+        // "vktbla" or "jksorzam" still land, but short random words don't.
+        var best = null, bestDist = Infinity;
+        Object.keys(candidates).forEach(function (c) {
+          var d = distance(key, c);
+          if (d < bestDist) { best = c; bestDist = d; }
+        });
+        var allowed = best && best.length >= 6 ? 2 : 1;
+        return bestDist <= allowed ? candidates[best] : null;
+      }
+
+      function showNotFound(tools) {
+        document.getElementById("requested").textContent = decodeURI(location.pathname);
+        var list = document.getElementById("suggestions");
+        var links = [{ href: base, name: "Főoldal" }].concat(tools.map(function (t) {
+          return { href: base + t.slug + "/", name: t.name };
+        }));
+        links.forEach(function (l) {
+          var li = document.createElement("li");
+          var a = document.createElement("a");
+          a.href = l.href;
+          a.textContent = l.name;
+          li.appendChild(a);
+          list.appendChild(li);
+        });
+        document.title = "Nem található – Digit";
+        document.getElementById("redirecting").hidden = true;
+        document.getElementById("not-found").hidden = false;
+      }
+
+      function run(tools) {
+        var slug = findSlug(tools);
+        // Anything below the first segment is dropped: /vk-tabla/whatever
+        // lands on /vk-tabla/ instead of looping back into this page.
+        var target = slug && base + slug + "/";
+        if (target && target !== location.pathname) {
+          location.replace(target + location.search + location.hash);
+        } else {
+          showNotFound(tools);
+        }
+      }
+
+      // tools.js is the single source of truth for which tools exist; if
+      // it somehow fails to load, aliases still work on their own.
+      var script = document.createElement("script");
+      script.src = base + "tools.js";
+      script.onload = function () { run(typeof TOOLS !== "undefined" ? TOOLS : []); };
+      script.onerror = function () { run([]); };
+      document.head.appendChild(script);
+    })();
+  </script>
+</body>
+</html>

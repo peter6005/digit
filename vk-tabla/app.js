@@ -344,79 +344,20 @@ function renderSorszamCard() {
 // Variable-count agnostic: operates purely on N-bit index patterns, decoupled
 // from any particular visual K-map grid shape. bits[i] corresponds to
 // PLACE_VALUES[i] (0/1 fixed, -1 = free/"don't care within this group").
-
-function computePrimeImplicants(targetSet) {
-  if (targetSet.size === 0) return [];
-
-  const keyOf = bits => bits.join(",");
-
-  const baseTerms = [...targetSet].map(m => ({
-    bits: PLACE_VALUES.map(w => (m & w) ? 1 : 0),
-    minterms: new Set([m]),
-  }));
-
-  const allTerms = new Map();
-  baseTerms.forEach(t => allTerms.set(keyOf(t.bits), t));
-  const usedKeys = new Set();
-
-  let currentLevel = baseTerms;
-  let changed = true;
-  while (changed) {
-    changed = false;
-    const nextLevelMap = new Map();
-
-    for (let i = 0; i < currentLevel.length; i++) {
-      for (let j = i + 1; j < currentLevel.length; j++) {
-        const a = currentLevel[i];
-        const b = currentLevel[j];
-        let diffPos = -1;
-        let diffCount = 0;
-        let compatible = true;
-
-        for (let p = 0; p < NUM_VARS; p++) {
-          const av = a.bits[p];
-          const bv = b.bits[p];
-          if (av === -1 && bv === -1) continue;
-          if (av === -1 || bv === -1) { compatible = false; break; }
-          if (av !== bv) {
-            diffCount++;
-            diffPos = p;
-            if (diffCount > 1) break;
-          }
-        }
-        if (!compatible || diffCount !== 1) continue;
-
-        const newBits = a.bits.slice();
-        newBits[diffPos] = -1;
-        const k = keyOf(newBits);
-        usedKeys.add(keyOf(a.bits));
-        usedKeys.add(keyOf(b.bits));
-        changed = true;
-
-        if (nextLevelMap.has(k)) {
-          const merged = nextLevelMap.get(k);
-          a.minterms.forEach(mt => merged.minterms.add(mt));
-          b.minterms.forEach(mt => merged.minterms.add(mt));
-        } else {
-          const merged = { bits: newBits, minterms: new Set([...a.minterms, ...b.minterms]) };
-          nextLevelMap.set(k, merged);
-          allTerms.set(k, merged);
-        }
-      }
-    }
-
-    currentLevel = [...nextLevelMap.values()];
-  }
-
-  const primes = [...allTerms.values()].filter(t => !usedKeys.has(keyOf(t.bits)));
-
-  const mapped = primes.map(t => ({
+// The combine-adjacent-terms search itself lives in ../utils.js, shared
+// with the JK-sorszám page's minimizer; this just supplies NUM_VARS and the
+// bit-expansion for an index, then reshapes the raw {bits, cover} results
+// into this page's own {bits, cells, size, key} shape (every downstream
+// caller here — groupTermHtml, selectMinimalCover, hazard detection —
+// expects cells/size, not a raw cover Set) and sorts largest-group-first.
+function primeImplicantGroups(targetSet) {
+  const raw = computePrimeImplicants(targetSet, NUM_VARS, m => PLACE_VALUES.map(w => (m & w) ? 1 : 0));
+  const mapped = raw.map(t => ({
     bits: t.bits,
-    cells: [...t.minterms].sort((a, b) => a - b).map(n => ({ n })),
-    size: t.minterms.size,
-    key: keyOf(t.bits),
+    cells: [...t.cover].sort((a, b) => a - b).map(n => ({ n })),
+    size: t.cover.size,
+    key: t.bits.join(","),
   }));
-
   mapped.sort((a, b) => b.size - a.size || a.cells[0].n - b.cells[0].n);
   return mapped;
 }
@@ -980,29 +921,9 @@ const GD = {
   padding: 16,
 };
 
-function svgEl(tag, attrs) {
-  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
-  Object.entries(attrs || {}).forEach(([k, v]) => el.setAttribute(k, v));
-  return el;
-}
-
-// AND gate: flat left edge, flat top/bottom for the first part, semicircular
-// bulge on the right. Total bounding width is exactly w (radius = h/2).
-function andGatePath(x, y, w, h) {
-  const flatW = w - h / 2;
-  const r = h / 2;
-  return `M ${x} ${y} L ${x + flatW} ${y} A ${r} ${r} 0 0 1 ${x + flatW} ${y + h} L ${x} ${y + h} Z`;
-}
-
-// OR gate: flat back edge (like the AND gate) so straight input jog lines
-// always land exactly on it — a concave back curve looked authentic but let
-// jog lines poke outside the silhouette wherever the curve bulged away from
-// x=gateX
-function orGatePath(x, y, w, h) {
-  const midY = y + h / 2;
-  const tipCtrlX = x + w * 0.62;
-  return `M ${x} ${y} L ${x} ${y + h} Q ${tipCtrlX} ${y + h} ${x + w} ${midY} Q ${tipCtrlX} ${y} ${x} ${y} Z`;
-}
+// svgEl / andGatePath / orGatePath now live in ../utils.js, shared with
+// the JK-sorszám page — both drew the exact same shapes from the exact
+// same code, just copy-pasted
 
 // draws one literal's horizontal wire (with an inverter bubble if negated)
 // from `fromX` to `toX` at height `y`; returns nothing, just appends to svg
@@ -1385,7 +1306,7 @@ function renderKmapSide(container, targetSet, mode, markZero) {
 
   container.innerHTML = "";
 
-  const groups = computePrimeImplicants(targetSet);
+  const groups = primeImplicantGroups(targetSet);
   const minimalInfo = selectMinimalCover(groups, targetSet);
   const groupMeta = computeVisibleGroupMeta(groups, minimalInfo);
   const hazardInfo = calcHazardInfo(groups, minimalInfo, targetSet);

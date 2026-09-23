@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digit – JK-sorszám</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="print.css">
+<link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+  <div class="page-loader" id="page-loader">
+    <div class="loader-grid"><span></span><span></span><span></span><span></span></div>
+    <div class="loader-label">Betöltés…</div>
+  </div>
+  <script>
+    (function () {
+      var MIN_MS = 550;
+      var start = performance.now();
+      function reveal() {
+        var el = document.getElementById("page-loader");
+        if (!el) return;
+        var wait = Math.max(0, MIN_MS - (performance.now() - start));
+        setTimeout(function () { el.classList.add("is-hidden"); }, wait);
+      }
+      if (document.readyState === "complete") reveal();
+      else window.addEventListener("load", reveal);
+    })();
+  </script>
+
+  <main class="wrap">
+    <a href="../" class="back-link">← Főoldal</a>
+    <h1>JK-sorszám</h1>
+    <p class="subtitle">Egyedi ciklusú számláló J-K tárolókkal — add meg a kívánt állapotsorozatot, a program automatikusan felépíti a gerjesztési táblázatot, minimalizálja a J és K bemeneteket, és élőben szimulálja az órajelre lépő számlálót.</p>
+
+    <section class="card">
+      <h2>Beállítások</h2>
+      <div class="control-row" title="Hány bites (hány tárolós) a számláló — ennyi Q-bitet és ugyanennyi betűt oszthatsz ki.">
+        <span class="control-label">Bitek száma</span>
+        <div class="var-count-buttons" id="bit-count-buttons">
+          <button type="button" class="var-count-btn" data-n="3" aria-label="3 bit">3</button>
+          <button type="button" class="var-count-btn" data-n="4" aria-label="4 bit">4</button>
+          <button type="button" class="var-count-btn" data-n="5" aria-label="5 bit">5</button>
+        </div>
+      </div>
+
+      <p class="hint">Add meg, melyik betű melyik bithelyiértéken (2ⁿ) álljon.</p>
+      <div id="weight-assign" class="weight-assign"></div>
+
+      <p class="hint">Add meg az állapotsorozatot, vesszővel vagy nyíllal elválasztva, a kívánt sorrendben — a ciklus a végén visszatér az első értékre.</p>
+      <input type="text" id="sequence-input" class="sequence-input" placeholder="pl. 1, 3, 4, 6, 8, 9" autocomplete="off" spellcheck="false" inputmode="text">
+      <p class="hint sequence-error" id="sequence-error" hidden></p>
+    </section>
+
+    <section class="card">
+      <h2>Élő szimuláció</h2>
+      <p class="hint">Kattints az órajel gombra, vagy indítsd el az automatikus lejátszást — a számláló a lenti gerjesztő függvények alapján, ténylegesen szimulálva lép a következő állapotra.</p>
+
+      <div class="sim-sequence" id="sim-sequence" aria-hidden="true"></div>
+
+      <div class="sim-display">
+        <div class="sim-state">
+          <div class="sim-state-num" id="sim-state-num">–</div>
+          <div class="sim-state-label">aktuális állapot</div>
+        </div>
+        <div class="sim-bits" id="sim-bits"></div>
+      </div>
+
+      <div class="sim-controls">
+        <button type="button" class="export-btn sim-clock-btn" id="clock-btn">Órajel impulzus ⏵</button>
+        <label class="switch-row switch-row-config">
+          <span class="switch">
+            <input type="checkbox" id="auto-toggle">
+            <span class="switch-slider"></span>
+          </span>
+          <span>Automatikus lejátszás (1 impulzus / mp)</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Állapottábla</h2>
+      <p class="hint">A tervezett ciklus — az aktuális állapotból mindig a táblázat szerinti következő állapotba lép a számláló.</p>
+      <div class="table-scroll">
+        <table id="state-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Gerjesztési táblázat</h2>
+      <p class="hint">A J-K gerjesztési táblázat alapján minden tárolóhoz meghatározható, milyen J és K bemenet szükséges az adott bitváltáshoz — „–” jelöli, ha az érték közömbös (mindkét bemenet-kombináció eredménye ugyanaz).</p>
+      <div class="table-scroll">
+        <table id="excitation-table">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Minimalizált gerjesztő függvények</h2>
+      <p class="hint">A ciklusban nem szereplő állapotok közömbösként kezelve, Karnaugh-táblával minimalizálva — ezek vezérlik a fenti szimulációt is.</p>
+      <div class="ff-equations" id="ff-equations"></div>
+    </section>
+
+    <div class="circuit-stage">
+      <section class="card">
+        <h2>Kapcsolási vázlat</h2>
+        <p class="hint">A J-K tárolók közös órajellel — mindegyik J és K bemenetét a fenti minimalizált függvények vezérlik.</p>
+        <div class="circuit-diagram" id="circuit-diagram"></div>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Exportálás</h2>
+      <p class="hint">Nyomtatáshoz és PDF-mentéshez készített, különálló összefoglaló. Az exportált változat egyszerű, nyomtatott dokumentumként jelenik meg, nem a weboldal teljes kinézetét másolja.</p>
+      <button type="button" class="export-btn" id="export-pdf-btn">Exportálás / Nyomtatás</button>
+    </section>
+  </main>
+
+  <div id="print-doc" aria-hidden="true"></div>
+
+  <script src="../utils.js"></script>
+  <script src="app.js"></script>
+  <script src="../print-export.js"></script>
+  <script src="export.js"></script>
+  <script src="../transition.js"></script>
+</body>
+</html>

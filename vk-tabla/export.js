@@ -5,34 +5,15 @@
 // laid out as a single reading column (see print.css), not a copy of the
 // two-column web layout, since arbitrary-width K-maps/gate diagrams don't
 // reliably fit a rigid multi-column print grid.
+//
+// cloneById/makeSection/buildPrintBrandHeader/buildPrintFooter/
+// wirePrintExport live in ../print-export.js, shared with the
+// JK-sorszám page's export.js — only the sections and header/footer copy
+// below are specific to this page.
 
 (function () {
   const exportBtn = document.getElementById("export-pdf-btn");
   const printDoc = document.getElementById("print-doc");
-
-  function cloneById(id) {
-    const el = document.getElementById(id);
-    return el ? el.cloneNode(true) : null;
-  }
-
-  function makeSection(titleText, hintText, ...children) {
-    const sec = document.createElement("section");
-    sec.className = "print-section";
-
-    const h2 = document.createElement("h2");
-    h2.textContent = titleText;
-    sec.appendChild(h2);
-
-    if (hintText) {
-      const p = document.createElement("p");
-      p.className = "hint";
-      p.textContent = hintText;
-      sec.appendChild(p);
-    }
-
-    children.forEach(c => { if (c) sec.appendChild(c); });
-    return sec;
-  }
 
   // a labeled sub-block within a section (e.g. "Diszjunktív" / "Konjunktív"
   // halves of the same topic), so the reader always knows which side of
@@ -111,7 +92,7 @@
   // doesn't say which side is which (see index.html) — on screen the
   // "Diszjunktív"/"Konjunktív" column headers above the pipeline grid supply
   // that, but the print document has no such column, so it needs its own
-  // sub-labels here, same pattern as buildMinimalSection below
+  // sub-labels here, same pattern as buildMinimalSection above
   function buildNameGateSection() {
     return makeSection(
       "Realizálás NÉV kapukkal",
@@ -122,34 +103,7 @@
   }
 
   function buildHeader() {
-    const frag = document.createDocumentFragment();
-
-    // a colored strip at the very top of the document — the same gradient
-    // treatment as the closing footer, so the report is bookended by the
-    // brand instead of just trailing off with it at the end
-    const bar = document.createElement("div");
-    bar.className = "print-header-bar";
-    frag.appendChild(bar);
-
-    const kicker = document.createElement("p");
-    kicker.className = "print-kicker";
-    kicker.textContent = "Automatikusan generált összefoglaló";
-    frag.appendChild(kicker);
-
-    const brandRow = document.createElement("div");
-    brandRow.className = "print-brand-row";
-
-    const title = document.createElement("h1");
-    title.className = "print-title";
-    title.textContent = "Franckarika";
-    brandRow.appendChild(title);
-
-    const dots = document.createElement("div");
-    dots.className = "print-brand-dots";
-    dots.innerHTML = "<span></span><span></span><span></span><span></span>";
-    brandRow.appendChild(dots);
-
-    frag.appendChild(brandRow);
+    const frag = buildPrintBrandHeader();
 
     const subtitle = document.createElement("p");
     subtitle.className = "print-subtitle";
@@ -164,23 +118,6 @@
     frag.appendChild(meta);
 
     return frag;
-  }
-
-  function buildFooter() {
-    const footer = document.createElement("div");
-    footer.className = "print-footer";
-
-    const brand = document.createElement("p");
-    brand.className = "print-footer-brand";
-    brand.textContent = "Franckarika";
-    footer.appendChild(brand);
-
-    const tagline = document.createElement("p");
-    tagline.className = "print-footer-tagline";
-    tagline.textContent = "Ingyenes, böngészőben futó eszköz 3–5 változós logikai függvények elemzéséhez — telepítés és regisztráció nélkül, bármikor újra elérhető.";
-    footer.appendChild(tagline);
-
-    return footer;
   }
 
   function buildPrintDoc() {
@@ -202,23 +139,10 @@
       "Ugyanez a hálózat kizárólag NOR kapukkal is felépíthető — a NAND-NAND duálisa.",
       "nor-gate-diagram", "nor-formula"
     ));
-    printDoc.appendChild(buildFooter());
+    printDoc.appendChild(buildPrintFooter(
+      "Ingyenes, böngészőben futó eszköz 3–5 változós logikai függvények elemzéséhez — telepítés és regisztráció nélkül, bármikor újra elérhető."
+    ));
   }
 
-  // a static, dependency-free site has no built-in way to save a PDF
-  // directly — window.print() and its dialog (pick a printer, or "Save as
-  // PDF") is the only mechanism, so print and download are really the
-  // same action here; one button for both, and the hint text next to it
-  // explains how to get a saved file instead of a printout
-  function exportPdf() {
-    buildPrintDoc();
-    document.body.classList.add("printing");
-    window.print();
-  }
-
-  window.addEventListener("afterprint", () => {
-    document.body.classList.remove("printing");
-  });
-
-  exportBtn.addEventListener("click", exportPdf);
+  wirePrintExport(exportBtn, buildPrintDoc);
 })();

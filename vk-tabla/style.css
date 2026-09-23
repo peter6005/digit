@@ -1,44 +1,7 @@
-:root {
-  --bg: #f5f6f8;
-  --card-bg: #ffffff;
-  --text: #1c1f26;
-  --muted: #667085;
-  --border: #e2e5ea;
-  --accent: #3b5bfd;
-  --accent-fg: #ffffff;
-  --one-bg: #e6f7ec;
-  --one-text: #12703f;
-  --off-hover-bg: #fdecea;
-  --error: #d1293d;
-  /* brand colors — shared.css's loader dots use these on both pages */
-  --accent-a: #6a5bff;
-  --accent-b: #ff6b9d;
-  --accent-c: #35d0ba;
-  --accent-d: #ffb648;
-  /* shared font stacks and focus style — defined once here so print.css
-     (which needs the same sans/mono stacks outside its serif-forced body
-     copy) can just reference them too, instead of repeating the literal
-     font list in another file */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: "SF Mono", Consolas, Menlo, monospace;
-  --focus-ring: 2px solid var(--accent);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14161b;
-    --card-bg: #1d2027;
-    --text: #e8eaed;
-    --muted: #9aa1ac;
-    --border: #2c303a;
-    --accent: #6a86ff;
-    --accent-fg: #0c0e12;
-    --one-bg: #143c28;
-    --one-text: #6fdc9a;
-    --off-hover-bg: #3a1e20;
-    --error: #ff6b7a;
-  }
-}
+/* color/font custom properties (--bg, --text, --accent-a..e, --font-sans,
+   etc.) all now live in ../shared.css, shared with the JK-sorszám page and
+   (for the accent palette) the landing page too — this file only adds
+   rules that build ON those tokens. */
 
 * { box-sizing: border-box; }
 

@@ -1,3 +1,5 @@
+/* --accent-a..e (the brand palette used by the loader dots below) now
+   live in shared.css, identical across the landing/vk-tabla/jk-sorszam pages */
 :root {
   --bg-1: #eef1ff;
   --bg-2: #ffffff;
@@ -5,10 +7,6 @@
   --muted: #5b6472;
   --card-bg: rgba(255, 255, 255, 0.72);
   --card-border: rgba(255, 255, 255, 0.6);
-  --accent-a: #6a5bff;
-  --accent-b: #ff6b9d;
-  --accent-c: #35d0ba;
-  --accent-d: #ffb648;
   --shadow: 0 20px 60px -20px rgba(40, 30, 90, 0.35);
 }
 
@@ -107,13 +105,13 @@ body {
 .landing {
   position: relative;
   z-index: 1;
-  max-width: 1180px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 64px 48px 120px;
+  padding: 64px 32px 120px;
 }
 
 .hero {
-  min-height: 62vh;
+  min-height: 46vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -121,10 +119,22 @@ body {
 
 h1.hero-title {
   font-size: clamp(4rem, 13vw, 11rem);
-  line-height: 0.94;
-  margin: 28px 0 24px;
+  line-height: 1.15;
+  /* background-clip: text only paints the gradient inside the element's
+     own box, so any glyph ink that hangs below it is simply invisible —
+     and how far the "g"'s descender hangs depends on which font the
+     system stack resolves to (Nimbus Sans on Linux drops much lower than
+     Helvetica/Arial). The bottom padding extends the painted box well
+     past any common descender; the margin gives the same amount back so
+     the layout below doesn't move. */
+  padding-bottom: 0.25em;
+  margin: 28px 0 calc(24px - 0.25em);
   font-weight: 800;
-  letter-spacing: -0.03em;
+  /* -0.03em was tuned for "Franckarika" (11 letters, no round bowls) —
+     at up to 11rem that's over 5px of negative tracking per letter pair,
+     which on a short, round-heavy word like "Digit" visibly crushes the
+     "g" into its neighboring "i"s instead of just looking tight */
+  letter-spacing: -0.01em;
   background: linear-gradient(120deg, var(--accent-a), var(--accent-b) 45%, var(--accent-d) 80%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -139,293 +149,151 @@ h1.hero-title {
   margin: 0 0 40px;
 }
 
-.format-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0 0 32px;
-}
-
-.format-chip {
-  padding: 7px 15px;
-  border-radius: 999px;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  backdrop-filter: blur(6px);
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--muted);
-}
-
-.cta-row {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.cta-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #fff;
-  text-decoration: none;
-  padding: 20px 38px;
-  border-radius: 16px;
-  background: linear-gradient(120deg, var(--accent-a), var(--accent-b));
-  box-shadow: var(--shadow);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.cta-btn:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 28px 70px -16px rgba(90, 60, 200, 0.5);
-}
-
-.cta-btn:active {
-  transform: translateY(0) scale(0.99);
-}
-
-.cta-btn .arrow {
-  transition: transform 0.18s ease;
-}
-
-.cta-btn:hover .arrow {
-  transform: translateX(5px);
-}
-
-.cta-hint {
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.stats-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 44px;
-}
-
-.stat {
-  flex: 1 1 160px;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  padding: 18px 22px;
-  backdrop-filter: blur(6px);
-}
-
-.stat-num {
+.section-heading {
   font-size: 1.9rem;
   font-weight: 800;
   letter-spacing: -0.01em;
-  background: linear-gradient(120deg, var(--accent-a), var(--accent-b));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  margin: 0 0 28px;
 }
 
-.stat-label {
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin-top: 4px;
+.tools-section {
+  margin-top: 12px;
 }
 
-/* the product shot gets its own full-width section below the hero, instead
-   of squeezed into a side column — makes it the centerpiece it deserves
-   and lets it scale up on wide screens */
-.demo-section {
-  margin-top: 20px;
+/* two equal-weight cards today, wraps to as many as .tools.js grows to —
+   a fixed minmax track (not a fixed column count) is what makes this
+   genuinely open-ended: a third/fourth tool just reflows in, no CSS
+   change needed */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
 }
 
-/* no max-width cap — fills the same width as the hero text/stats above it
-   instead of being artificially boxed in, so the screenshots read bigger
-   by default */
-.demo-frame {
-  width: 100%;
-}
-
-/* the carousel and its two nav buttons as flex siblings — the buttons
-   take their own fixed width and the carousel fills whatever's left, so
-   they sit fully beside the picture rather than floating on top of it,
-   at any frame width, with no absolute-position math needed */
-.demo-carousel-wrap {
+/* not a wrapping <a> — the image and the CTA link both live inside, and a
+   single enclosing link can't contain another link (or safely coexist
+   with more than one clickable thing later) */
+.tool-card {
   display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* fixed-ratio "stage" so the frame never jumps size as slides of very
-   different natural shapes (a wide K-map pair vs. a tall PDF page) cross-
-   fade through it — object-fit:contain letterboxes/pillarboxes each one
-   against the mat color instead of cropping or stretching it */
-.demo-carousel {
-  position: relative;
-  flex: 1 1 auto;
-  min-width: 0;
-  aspect-ratio: 1.5 / 1;
-  background: var(--bg-2);
-  border-radius: 14px;
+  flex-direction: column;
+  align-items: stretch;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
   overflow: hidden;
+  backdrop-filter: blur(6px);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.demo-slide {
+.tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+
+/* full-bleed to the card's own edges — a tool with no screenshots yet
+   (see tools.js) just skips this element entirely and its card is the
+   same size and layout as one that has it, only shorter. The slides are
+   stacked on top of each other and crossfaded by landing.js; the
+   screenshots are all framed at exactly 16:10, so cover never crops. */
+.tool-card-slides {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--bg-2);
+}
+
+.tool-card-slide {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: top;
   opacity: 0;
-  /* an opacity:0 element still hit-tests — without this, whichever slide
-     is LAST in DOM order would always intercept clicks/hover no matter
-     which one is actually visible, since stacking order otherwise just
-     follows source order */
-  pointer-events: none;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.6s ease;
 }
 
-.demo-slide.is-active {
+.tool-card-slide.is-active {
   opacity: 1;
-  pointer-events: auto;
-  cursor: zoom-in;
 }
 
-/* small round "glass" buttons beside the picture — the dots alone don't
-   read as "there's more" at a glance, these make it obvious there's a
-   whole set of screenshots to click through, not just one static picture */
-.demo-nav {
-  flex: none;
-  width: 38px;
-  height: 38px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-  color: #33364a;
-  font-size: 1.4rem;
+.tool-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1;
+  padding: 26px 26px 24px;
+}
+
+.tool-card-icon {
+  font-size: 2rem;
   line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: 14px;
 }
 
-.demo-nav:hover {
-  background: #fff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.26);
-  transform: scale(1.1);
-}
-
-.demo-nav:active {
-  transform: scale(0.96);
-}
-
-@media (max-width: 560px) {
-  .demo-carousel-wrap {
-    gap: 6px;
-  }
-
-  .demo-nav {
-    width: 30px;
-    height: 30px;
-    font-size: 1.1rem;
-  }
-}
-
-.demo-dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-/* var(--card-border) (translucent white) all but disappears sitting on
-   .demo-frame's own translucent-white background — needs a solid, muted
-   tone instead to actually read as a dot rather than nothing */
-.demo-dot {
-  width: 8px;
-  height: 8px;
-  padding: 0;
-  border: none;
-  border-radius: 999px;
-  background: var(--muted);
-  opacity: 0.35;
-  cursor: pointer;
-  transition: opacity 0.15s ease, background 0.15s ease, transform 0.15s ease;
-}
-
-.demo-dot:hover {
-  opacity: 0.7;
-}
-
-.demo-dot.is-active {
-  background: var(--accent-a);
-  opacity: 1;
-  transform: scale(1.35);
-}
-
-.demo-caption {
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.88rem;
-  margin: 16px 0 0;
-}
-
-.features-section {
-  margin-top: 96px;
-}
-
-.features-heading {
-  text-align: center;
-  font-size: 1.9rem;
+.tool-card-name {
+  font-size: 1.3rem;
   font-weight: 800;
   letter-spacing: -0.01em;
-  margin: 0 0 32px;
+  margin: 0 0 8px;
 }
 
-/* explicit column counts per breakpoint instead of auto-fit — auto-fit's
-   count depends on exact container width, and with 8 cards that easily
-   lands on an awkward remainder (e.g. 4 across leaves the 9th alone on
-   its own row). Fixed counts always divide 8 evenly, at every width */
-.features {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+.tool-card-tagline {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 0 0 16px;
 }
 
-.feature-card {
-  background: var(--card-bg);
+.tool-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.tool-card-chip {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card-bg) 60%, transparent);
   border: 1px solid var(--card-border);
-  border-radius: 18px;
-  padding: 22px 20px 20px;
-  backdrop-filter: blur(6px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* an actual button, not just colored text — gradient text alone read as
+   decoration rather than something clickable */
+.tool-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  padding: 11px 20px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--accent-a), var(--accent-b));
+  box-shadow: 0 10px 26px -12px rgba(90, 60, 200, 0.55);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.feature-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow);
+.tool-card:hover .tool-card-cta,
+.tool-card-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px -12px rgba(90, 60, 200, 0.6);
 }
 
-.feature-card .icon {
-  font-size: 1.7rem;
-  display: block;
-  margin-bottom: 12px;
+.tool-card-cta .arrow {
+  transition: transform 0.18s ease;
 }
 
-.feature-card h3 {
-  font-size: 1.02rem;
-  margin: 0 0 6px;
-}
-
-.feature-card p {
-  font-size: 0.87rem;
-  color: var(--muted);
-  margin: 0;
-  line-height: 1.5;
+.tool-card:hover .tool-card-cta .arrow {
+  transform: translateX(5px);
 }
 
 .footer-note {
@@ -443,156 +311,5 @@ h1.hero-title {
   .hero {
     min-height: auto;
   }
-
-  .features-section {
-    margin-top: 64px;
-  }
-
-  .features {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
-@media (max-width: 560px) {
-  .features {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* full-size view of whichever demo slide was tapped — on a phone the
-   carousel frame itself is only ever viewport-width minus gutters and
-   nav-button space, but this overlay drops both, so the same image
-   renders meaningfully bigger without needing a separate mobile-cropped
-   asset. visibility deliberately left out of the transition (only opacity
-   is) — transitioning visibility together with opacity delays the
-   element from actually becoming interactive/focusable until the
-   transition finishes, in at least some browsers */
-.demo-lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: rgba(10, 12, 20, 0.85);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease;
-}
-
-.demo-lightbox.is-open {
-  opacity: 1;
-  visibility: visible;
-}
-
-.demo-lightbox-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  max-width: 100%;
-  max-height: 100%;
-}
-
-.demo-lightbox img {
-  display: block;
-  max-width: 100%;
-  /* leave room below for the caption instead of the image claiming the
-     full available height and pushing the caption out of view */
-  max-height: calc(100vh - 48px - 44px);
-  border-radius: 10px;
-  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
-  cursor: zoom-out;
-  opacity: 1;
-  transform: scale(1);
-  transition: opacity 0.18s ease, transform 0.18s ease;
-}
-
-.demo-lightbox-caption {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.95rem;
-  text-align: center;
-  max-width: 70ch;
-  padding: 0 8px;
-}
-
-/* toggled briefly by landing.js around swapping the <img> src when
-   stepping to the next/previous slide while the lightbox is open, so the
-   switch reads as a deliberate little transition instead of an abrupt cut */
-.demo-lightbox img.is-switching {
-  opacity: 0;
-  transform: scale(0.96);
-}
-
-.demo-lightbox-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-size: 1.3rem;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease;
-}
-
-.demo-lightbox-close:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.demo-lightbox-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-size: 1.7rem;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease, transform 0.15s ease;
-}
-
-.demo-lightbox-nav:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-50%) scale(1.08);
-}
-
-.demo-lightbox-prev {
-  left: 18px;
-}
-
-.demo-lightbox-next {
-  right: 18px;
-}
-
-@media (max-width: 560px) {
-  .demo-lightbox-nav {
-    width: 38px;
-    height: 38px;
-    font-size: 1.3rem;
-  }
-
-  .demo-lightbox-prev {
-    left: 6px;
-  }
-
-  .demo-lightbox-next {
-    right: 6px;
-  }
-}
