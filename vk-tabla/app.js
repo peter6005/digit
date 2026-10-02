@@ -1149,10 +1149,18 @@ function renderGateDiagram(container, chosenGroups, mode, useBubble) {
 
     if (lits.length === 0) return; // handled as a trivial case above
 
-    if (litYs.length === 1 && !termHasGate[i]) {
+    // a single already-negated literal (e.g. a term that's just "A'")
+    // would get inverted on the way in (primary input A -> bubble -> A')
+    // and then inverted right back by the term's own NAND/NOR-as-inverter
+    // gate (A' -> A) — two cancelling inversions that only amount to a
+    // plain wire from the primary input straight through, same identity
+    // as the matching fix in renderDeMorganFormula (overline(overline(A)) = A)
+    const isCancellingNegation = useBubble && litYs.length === 1 && lits[0].negated;
+
+    if (litYs.length === 1 && (!termHasGate[i] || isCancellingNegation)) {
       // single literal, no gate: wire straight through at its own height,
       // then jog to the term's center line for the convergence step
-      drawLiteralWire(svg, lits[0].letter, lits[0].negated, labelX, termOutX, litYs[0]);
+      drawLiteralWire(svg, lits[0].letter, isCancellingNegation ? false : lits[0].negated, labelX, termOutX, litYs[0]);
       termOutPoints.push({ x: termOutX, y: litYs[0] });
       return;
     }
