@@ -886,8 +886,13 @@ function renderFormula(el, chosenGroups, mode) {
 //   NAND-NAND (sop): F = \overline{ \overline{t1} · \overline{t2} · ... }
 //   NOR-NOR   (pos): F = \overline{ \overline{s1} + \overline{s2} + ... }
 // — one overline per term (its own gate output) plus one more spanning
-// all of them (the final gate's output), so several bars stack directly
-// on top of each other wherever a term collapses to a single literal
+// all of them (the final gate's output). For a multi-literal term that's
+// a real NAND/NOR gate with a genuine overlined-product output. But for a
+// single-literal term the "gate" is just NAND(x,x)/NOR(x,x) = NOT(x), a
+// plain inverter — its own already-negated literal (e.g. Ā) wrapped in
+// yet another overline is double negation that was never simplified back
+// down (overline(overline(A)) = A), not a second real gate stage, so that
+// case flips the literal's bit directly instead of re-overlining it.
 function renderDeMorganFormula(el, chosenGroups, mode) {
   if (chosenGroups.length === 0) {
     el.innerHTML = `F(${LETTERS.join(", ")}) = ${mode === "sop" ? "0" : "1"}`;
@@ -903,6 +908,9 @@ function renderDeMorganFormula(el, chosenGroups, mode) {
   const joiner = mode === "sop" ? " · " : " + ";
   const termHtmls = chosenGroups.map(g => {
     const lits = getTermLiterals(g.cells, mode);
+    if (lits.length === 1) {
+      return literalHtml(lits[0].letter, lits[0].negated ? 1 : 0);
+    }
     const inner = lits.map(l => literalHtml(l.letter, l.negated ? 0 : 1)).join(joiner);
     return `<span class="overline">${inner}</span>`;
   });
